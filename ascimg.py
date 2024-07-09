@@ -7,6 +7,7 @@ class Config:
     filepath: str
     width: int
     height: int
+    characters: str
     write_to: str
     print: bool
 
@@ -26,6 +27,9 @@ class Config:
         parser.add_argument("width", type=positive_int, nargs="?", default=0,
                             help="the width of the ascii image in characters (default: whatever keeps the original ratio)")
 
+        parser.add_argument("--characters", "-c", type=str, default=" .:+o0%#",
+                            help="the characters used to represent intensity, from darkest to lightest (defaut: ' .:+o0%#')")
+
         parser.add_argument("--print", "-p", action="store_true", help="print the generated ascii image to stdout")
         parser.add_argument("--write_to", "-w",  type=str, default="",
                             help="write the generated ascii image to a specified file")
@@ -33,8 +37,9 @@ class Config:
         args = parser.parse_args()
 
         self.filepath = args.filepath
-        self.height = args.height
         self.width = args.width
+        self.height = args.height
+        self.characters = args.characters
         self.write_to = args.write_to
         self.print = True if not args.write_to else args.print
 
@@ -55,24 +60,7 @@ def run(cfg: Config):
     for y in range(height):
         for x in range(width):
             l = luma(pixels[y*width + x])
-            if l > 0.99:
-                ascii += "#"
-            elif l > 0.88:
-                ascii += "%"
-            elif l > 0.77:
-                ascii += "X"
-            elif l > 0.66:
-                ascii += "="
-            elif l > 0.55:
-                ascii += "+"
-            elif l > 0.44:
-                ascii += "-"
-            elif l > 0.33:
-                ascii += ","
-            elif l > 0.22:
-                ascii += "."
-            else:
-                ascii += " "
+            ascii += cfg.characters[int(l * (len(cfg.characters)-1))]
         ascii += "\n"
 
     if cfg.print:
