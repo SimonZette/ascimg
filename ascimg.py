@@ -7,13 +7,13 @@ class Config:
     filepath: str
     width: int
     height: int
-    write: bool
+    write_to: str
     print: bool
 
     def __init__(self):
         def positive_int(value):
             value = int(value)
-            if value < 0:
+            if value <= 0:
                 raise argparse.ArgumentTypeError(f"{value} is not positive")
             return value
 
@@ -27,15 +27,16 @@ class Config:
                             help="the width of the ascii image in characters (default: whatever keeps the original ratio)")
 
         parser.add_argument("--print", "-p", action="store_true", help="print the generated ascii image to stdout")
-        parser.add_argument("--write", "-w", action="store_true", help="write the generated ascii image to 'ascii.txt'")
+        parser.add_argument("--write_to", "-w",  type=str, default="",
+                            help="write the generated ascii image to a specified file")
 
         args = parser.parse_args()
 
         self.filepath = args.filepath
         self.height = args.height
         self.width = args.width
-        self.write = args.write
-        self.print = True if not args.write else args.print
+        self.write_to = args.write_to
+        self.print = True if not args.write_to else args.print
 
 
 def luma(pixel) -> float:
@@ -77,10 +78,10 @@ def run(cfg: Config):
     if cfg.print:
         print(ascii[:-1])
 
-    if cfg.write:
-        with open("ascii.txt", "w") as f:
+    if cfg.write_to:
+        with open(cfg.write_to, "w") as f:
             f.write(ascii)
-        print("ascii saved to 'ascii.txt'")
+        print(f"ascii saved to {cfg.write_to}")
 
 
 if __name__ == "__main__":
