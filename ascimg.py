@@ -1,15 +1,13 @@
 import argparse
-from enum import auto, Enum
-import sys
 
 from PIL import Image
 
 
 class Config:
-    path: str
+    filepath: str
     width: int
     height: int
-    save: bool
+    write: bool
     print: bool
 
     def __init__(self):
@@ -33,10 +31,10 @@ class Config:
 
         args = parser.parse_args()
 
-        self.path = args.filepath
+        self.filepath = args.filepath
         self.height = args.height
         self.width = args.width
-        self.save = args.write
+        self.write = args.write
         self.print = True if not args.write else args.print
 
 
@@ -46,16 +44,16 @@ def luma(pixel) -> float:
 
 def run(cfg: Config):
     pixels = []
-    with Image.open(cfg.path) as img:
-        h = cfg.height
-        w = cfg.width if cfg.width else int(img.size[0] * (h/img.size[1]) * 2)
-        img = img.resize((w, h))
+    with Image.open(cfg.filepath) as img:
+        height = cfg.height
+        width = cfg.width if cfg.width else int(img.size[0] * (height/img.size[1]) * 2)
+        img = img.resize((width, height))
         pixels = list(img.getdata())
 
     ascii = ""
-    for y in range(h):
-        for x in range(w):
-            l = luma(pixels[y*w + x])
+    for y in range(height):
+        for x in range(width):
+            l = luma(pixels[y*width + x])
             if l > 0.99:
                 ascii += "#"
             elif l > 0.88:
@@ -79,7 +77,7 @@ def run(cfg: Config):
     if cfg.print:
         print(ascii[:-1])
 
-    if cfg.save:
+    if cfg.write:
         with open("ascii.txt", "w") as f:
             f.write(ascii)
         print("ascii saved to 'ascii.txt'")
