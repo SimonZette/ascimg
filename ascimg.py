@@ -27,8 +27,8 @@ class Config:
         parser.add_argument("width", type=positive_int, nargs="?", default=0,
                             help="the width of the ascii image in characters (default: whatever keeps the original ratio)")
 
-        parser.add_argument("--characters", "-c", type=str, default=" .:+o0%#",
-                            help="the characters used to represent intensity, from darkest to lightest (defaut: ' .:+o0%#')")
+        parser.add_argument("--characters", "-c", type=str, default=" .:*oe?8#",
+                            help="the characters used to represent brightness, from darkest to lightest (defaut: ' .:*oe?8#')")
 
         parser.add_argument("--print", "-p", action="store_true", help="print the generated ascii image to stdout")
         parser.add_argument("--write_to", "-w",  type=str, default="",
@@ -45,7 +45,9 @@ class Config:
 
 
 def luma(pixel) -> float:
-    r, g, b, _ = pixel;
+    r = pixel[0]
+    g = pixel[1]
+    b = pixel[2]
     return (r*0.299 + g*0.587 + b*0.114) / 255.0
 
 def run(cfg: Config):
