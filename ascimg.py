@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 from PIL import Image
 
@@ -18,6 +19,12 @@ class Config:
                 raise argparse.ArgumentTypeError(f"{value} is not positive")
             return value
 
+        def non_empty_str(value):
+            value = str(value)
+            if len(value) == 0:
+                raise argparse.ArgumentTypeError("The argument cannot be an empty string")
+            return value
+
         parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter,
                                          description="Generate ascii from an image")
 
@@ -27,7 +34,7 @@ class Config:
         parser.add_argument("width", type=positive_int, nargs="?", default=0,
                             help="the width of the ascii image in characters (default: whatever keeps the original ratio)")
 
-        parser.add_argument("--characters", "-c", type=str, default=" .:*oe?8#",
+        parser.add_argument("--characters", "-c", type=non_empty_str, default=" .:*oe?8#",
                             help="the characters used to represent brightness, from darkest to lightest (defaut: ' .:*oe?8#')")
 
         parser.add_argument("--print", "-p", action="store_true", help="print the generated ascii image to stdout")
@@ -52,11 +59,16 @@ def luma(pixel) -> float:
 
 def run(cfg: Config):
     pixels = []
-    with Image.open(cfg.filepath) as img:
-        height = cfg.height
-        width = cfg.width if cfg.width else int(img.size[0] * (height/img.size[1]) * 2)
-        img = img.resize((width, height))
-        pixels = list(img.getdata())
+
+    try:
+        with Image.open(cfg.filepath) as img:
+            height = cfg.height
+            width = cfg.width if cfg.width else int(img.size[0] * (height/img.size[1]) * 2)
+            img = img.resize((width, height))
+            pixels = list(img.getdata())
+    except FileNotFoundError:
+        print(f"Failed to find the file '{cfg.filepath}'")
+        sys.exit(1)
 
     ascii = ""
     for y in range(height):
